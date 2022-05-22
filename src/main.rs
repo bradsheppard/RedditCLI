@@ -1,5 +1,5 @@
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -11,39 +11,27 @@ use tui::{
 mod ui;
 mod api;
 mod state;
+mod events;
 
 use api::ApiClient;
-use state::{State, StatefulList};
+use events::handle_key_press;
+use state::{State, Screen};
 
-async fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut state: State, client: ApiClient) -> io::Result<()> {
+async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, client: ApiClient) -> io::Result<()> {
     loop {
-        terminal.draw(|f| ui::draw_search_screen(f, &state.input, &mut state.subbreddits))?;
+        match state.screen {
+            Screen::Search => {
+                terminal.draw(|f| ui::draw_search_screen(f, &state.input, &mut state.subbreddits))?;
+            }
+            Screen::Details => {
+                terminal.draw(|f| ui::draw_detail_screen(f))?;
+            }
+        }
 
-        if let Event::Key(key) = event::read()? {
-            if let KeyCode::Char('q') = key.code {
-                return Ok(());
-            }
-            else {
-                match key.code {
-                    KeyCode::Char(c) => {
-                        state.input.push(c);
-                    }
-                    KeyCode::Backspace => {
-                        state.input.pop();
-                    }
-                    KeyCode::Enter => {
-                        let subbreddits = client.get_subreddits(&state.input).await;
-                        state.subbreddits = StatefulList::with_items(subbreddits.unwrap());
-                    }
-                    KeyCode::Down => {
-                        state.subbreddits.next()
-                    }
-                    KeyCode::Up => {
-                        state.subbreddits.previous()
-                    }
-                    _ => {}
-                }
-            }
+        let next = handle_key_press(state, &client).await;
+
+        if !next {
+            return Ok(());
         }
     }
 }
@@ -58,11 +46,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
-    let app = State::new();
+    let mut app = State::new();
     let client = ApiClient::new().await;
 
     let res = match client {
-        Ok(c) => run_app(&mut terminal, app, c).await,
+        Ok(c) => run_app(&mut terminal, &mut app, c).await,
         _ => panic!("Panic")
     };
 
