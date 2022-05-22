@@ -2,6 +2,9 @@ use serde::{Serialize, Deserialize};
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
 use std::env;
 
+use crate::state::SubredditDetail;
+
+
 #[derive(Serialize, Deserialize, Debug)]
 struct OAuthResponse {
     access_token: String
@@ -10,6 +13,17 @@ struct OAuthResponse {
 #[derive(Serialize, Deserialize, Debug)]
 struct NamesResponse {
     names: Vec<String>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct DetailResponse {
+    data: DetailData
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct DetailData {
+    description: String,
+    subscribers: usize
 }
 
 pub struct ApiClient {
@@ -37,14 +51,40 @@ impl ApiClient {
             .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
             .header(USER_AGENT, "rcli")
             .send()
-            .await;
-
-        let resp2 = resp.unwrap()
+            .await
+            .unwrap()
             .json::<NamesResponse>()
             .await;
 
-        match resp2 {
+        match resp {
             Ok(r) => Ok(r.names),
+            Err(r) => Err(r)
+        }
+    }
+
+    pub async fn get_subreddit_details(&self, subbreddit: &str) -> Result<SubredditDetail, reqwest::Error> {
+        let client = reqwest::Client::new();
+
+        let resp = client.get(format!("https://oauth.reddit.com/r/{subbreddit}/about"))
+            .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
+            .header(USER_AGENT, "rcli")
+            .send()
+            .await
+            .unwrap()
+            .json::<DetailResponse>()
+            .await;
+
+        match resp {
+            Ok(r) => {
+                let data = r.data;
+                let subreddit_detail = SubredditDetail {
+                    name: subbreddit.to_owned(),
+                    description: data.description,
+                    subscriber_count: data.subscribers
+                };
+
+                return Ok(subreddit_detail);
+            }
             Err(r) => Err(r)
         }
     }
@@ -74,7 +114,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_subbreddits() {
-        let client = ApiClient::new().await;
+        let client = ApiClient::new().await.ok().unwrap();
         let subreddits = client.get_subreddits("guitar").await.unwrap();
         assert_eq!(subreddits.len() >= 1, true);
     }

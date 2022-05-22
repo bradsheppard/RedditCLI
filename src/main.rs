@@ -17,7 +17,7 @@ use state::{State, StatefulList};
 
 async fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut state: State, client: ApiClient) -> io::Result<()> {
     loop {
-        terminal.draw(|f| ui::draw_ui(f, &state.input, &mut state.subbreddits))?;
+        terminal.draw(|f| ui::draw_search_screen(f, &state.input, &mut state.subbreddits))?;
 
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {

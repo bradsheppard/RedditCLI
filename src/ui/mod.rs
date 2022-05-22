@@ -1,3 +1,3 @@
-mod ui;
+mod search_screen;
 
-pub use self::ui::draw_ui;
+pub use self::search_screen::draw_search_screen;

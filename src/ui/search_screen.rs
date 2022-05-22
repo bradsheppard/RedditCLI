@@ -9,7 +9,7 @@ use tui::{
 
 use crate::state::StatefulList;
 
-pub fn draw_ui<B: Backend>(f: &mut Frame<B>, input_string: &str, subreddits: &mut StatefulList<String>) {
+pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subreddits: &mut StatefulList<String>) {
     let items: Vec<ListItem> = subreddits
         .items
         .iter()
@@ -20,7 +20,7 @@ pub fn draw_ui<B: Backend>(f: &mut Frame<B>, input_string: &str, subreddits: &mu
         .collect();
 
     let items = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("List"))
+        .block(Block::default().borders(Borders::ALL).title("Subreddits"))
         .highlight_style(
             Style::default()
                 .bg(Color::LightGreen)
@@ -50,9 +50,3 @@ pub fn draw_ui<B: Backend>(f: &mut Frame<B>, input_string: &str, subreddits: &mu
     f.render_stateful_widget(items, chunks[1], &mut subreddits.state);
 }
 
-pub fn draw_content<B: Backend>(f: &mut Frame<B>) {
-    let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(1)
-        .split(f.size());
-}

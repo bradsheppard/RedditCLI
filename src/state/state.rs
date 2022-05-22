@@ -2,12 +2,17 @@ use tui::widgets::ListState;
 
 pub struct State {
     pub input: String,
-    pub subbreddits: StatefulList<String>
+    pub subbreddits: StatefulList<String>,
+    pub subbreddit_details: Option<SubredditDetail>
 }
 
 impl State {
     pub fn new() -> Self {
-        State { input: String::new(), subbreddits: StatefulList::with_items(vec![])}
+        State { 
+            input: String::new(), 
+            subbreddits: StatefulList::with_items(vec![]),
+            subbreddit_details: None
+        }
     }
 }
 
