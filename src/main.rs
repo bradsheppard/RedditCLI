@@ -14,7 +14,7 @@ mod state;
 mod events;
 
 use api::ApiClient;
-use events::handle_key_press;
+use events::handle_search_screen;
 use state::{State, Screen};
 
 async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, client: ApiClient) -> io::Result<()> {
@@ -24,11 +24,18 @@ async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, clie
                 terminal.draw(|f| ui::draw_search_screen(f, &state.input, &mut state.subbreddits))?;
             }
             Screen::Details => {
-                terminal.draw(|f| ui::draw_detail_screen(f))?;
+                match &state.subbreddit_details {
+                    Some(details) => {
+                        terminal.draw(|f| ui::draw_detail_screen(f, details));
+                    }
+                    None => {
+                        panic!("Exiting");
+                    }
+                }
             }
         }
 
-        let next = handle_key_press(state, &client).await;
+        let next = handle_search_screen(state, &client).await;
 
         if !next {
             return Ok(());
