@@ -1,5 +1,5 @@
 use crossterm::{
-    event::{DisableMouseCapture, EnableMouseCapture},
+    event::{DisableMouseCapture, EnableMouseCapture, Event, self},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
@@ -14,7 +14,7 @@ mod state;
 mod events;
 
 use api::ApiClient;
-use events::handle_search_screen;
+use events::{handle_area, handle_global};
 use state::{State, Screen};
 
 async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, client: ApiClient) -> io::Result<()> {
@@ -26,7 +26,7 @@ async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, clie
             Screen::Details => {
                 match &state.subbreddit_details {
                     Some(details) => {
-                        terminal.draw(|f| ui::draw_detail_screen(f, details));
+                        terminal.draw(|f| ui::draw_detail_screen(f, details))?;
                     }
                     None => {
                         panic!("Exiting");
@@ -35,10 +35,13 @@ async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, clie
             }
         }
 
-        let next = handle_search_screen(state, &client).await;
+        if let Event::Key(key) = event::read().unwrap() {
+            handle_area(key.code, state, &client).await;
+            let next = handle_global(key.code);
 
-        if !next {
-            return Ok(());
+            if !next{
+                return Ok(());
+            }
         }
     }
 }

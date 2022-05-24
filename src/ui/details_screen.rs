@@ -1,8 +1,8 @@
 use tui::{
     backend::Backend,
-    layout::{Constraint, Direction, Layout},
-    widgets::{Block, Borders, Paragraph},
-    Frame
+    layout::{Constraint, Direction, Layout, Alignment},
+    widgets::{Block, Borders, Paragraph, Wrap},
+    Frame, text::Spans
 };
 
 use crate::state::SubredditDetail;
@@ -14,17 +14,29 @@ pub fn draw_detail_screen<B: Backend>(f: &mut Frame<B>, details: &SubredditDetai
         .margin(1)
         .constraints(
             [
-                Constraint::Percentage(10),
-                Constraint::Percentage(90)
+                Constraint::Length(2),
+                Constraint::Length(20),
+                Constraint::Length(100)
             ].as_ref()
         )
         .split(f.size());
 
-    let details_block = Block::default()
-        .title(&*details.name)
-        .borders(Borders::ALL);
-    let details_paragraph = Paragraph::new(&*details.description)
-        .block(details_block);
+    let help_line = Spans::from("q: Go Back");
+    let help_paragraph = Paragraph::new(help_line);
 
-    f.render_widget(details_paragraph, chunks[0]);
+    let meta_lines = vec![
+        Spans::from(&*details.name),
+        Spans::from("\n"),
+        Spans::from(&*details.description)
+    ];
+    let meta_block = Block::default()
+        .title("Subreddit Info")
+        .borders(Borders::ALL);
+    let meta_paragraph = Paragraph::new(meta_lines)
+        .block(meta_block)
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
+
+    f.render_widget(help_paragraph, chunks[0]);
+    f.render_widget(meta_paragraph, chunks[1]);
 }

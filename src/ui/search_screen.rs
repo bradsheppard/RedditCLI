@@ -3,13 +3,28 @@ use tui::{
     layout::{Constraint, Direction, Layout},
     widgets::{Block, Borders, Paragraph, ListItem, List},
     style::{Color, Style, Modifier},
-    text::Span,
+    text::{Span, Spans},
     Frame,
 };
 
 use crate::state::StatefulList;
 
 pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subreddits: &mut StatefulList<String>) {
+   let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(1)
+        .constraints(
+            [
+                Constraint::Length(2),
+                Constraint::Length(5),
+                Constraint::Length(40)
+            ].as_ref()
+        )
+        .split(f.size());
+
+   let help_line = Spans::from("ESC: To Exit");
+   let help_paragraph = Paragraph::new(help_line);
+
     let items: Vec<ListItem> = subreddits
         .items
         .iter()
@@ -28,17 +43,6 @@ pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subr
         )
         .highlight_symbol(">> ");
 
-   let chunks = Layout::default()
-        .direction(Direction::Vertical)
-        .margin(1)
-        .constraints(
-            [
-                Constraint::Percentage(10),
-                Constraint::Percentage(90)
-            ].as_ref()
-        )
-        .split(f.size());
-
     let search_block = Block::default()
          .title("Search Subreddits")
          .borders(Borders::ALL);
@@ -46,7 +50,8 @@ pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subr
     let input = Paragraph::new(input_string)
         .block(search_block);
 
-    f.render_widget(input, chunks[0]);
-    f.render_stateful_widget(items, chunks[1], &mut subreddits.state);
+    f.render_widget(help_paragraph, chunks[0]);
+    f.render_widget(input, chunks[1]);
+    f.render_stateful_widget(items, chunks[2], &mut subreddits.state);
 }
 
