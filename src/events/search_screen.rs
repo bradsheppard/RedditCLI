@@ -13,33 +13,33 @@ pub async fn handle_search_screen(key_code: KeyCode, state: &mut State, client: 
         KeyCode::Enter => {
             let selected = state.subbreddits.state.selected();
 
-            if !selected.is_some() {
-                let subbreddits = client.get_subreddits(&state.input).await;
-                state.subbreddits = StatefulList::with_items(subbreddits.unwrap());
-            }
-            else {
-                let index = selected.unwrap();
-
-                let selected_subreddit_name = &state.subbreddits.items[index];
-                let selected_subreddit_details = client.get_subreddit_details(selected_subreddit_name).await;
-                let articles = client.get_subreddit_articles(selected_subreddit_name).await;
-
-                match selected_subreddit_details {
-                    Ok(details) => {
-                        state.selected_subreddit = Some(details);
-                        state.screen = Screen::Details;
-                    }
-                    Err(error) => {
-                        state.input = error.to_string();
-                    }
+            match selected {
+                None => {
+                    let subbreddits = client.get_subreddits(&state.input).await;
+                    state.subbreddits = StatefulList::with_items(subbreddits.unwrap());
                 }
+                Some(index) => {
+                    let selected_subreddit_name = &state.subbreddits.items[index];
+                    let selected_subreddit_details = client.get_subreddit_details(selected_subreddit_name).await;
+                    let articles = client.get_subreddit_articles(selected_subreddit_name).await;
 
-                match articles {
-                    Ok(a) => {
-                        state.articles = StatefulList::with_items(a);
+                    match selected_subreddit_details {
+                        Ok(details) => {
+                            state.selected_subreddit = Some(details);
+                            state.screen = Screen::Details;
+                        }
+                        Err(error) => {
+                            state.input = error.to_string();
+                        }
                     }
-                    Err(error) => {
-                        state.input = error.to_string();
+
+                    match articles {
+                        Ok(a) => {
+                            state.articles = StatefulList::with_items(a);
+                        }
+                        Err(error) => {
+                            state.input = error.to_string();
+                        }
                     }
                 }
             }

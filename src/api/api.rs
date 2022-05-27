@@ -71,8 +71,7 @@ impl ApiClient {
             .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
             .header(USER_AGENT, "rcli")
             .send()
-            .await
-            .unwrap()
+            .await?
             .json::<NamesResponse>()
             .await;
 
@@ -89,8 +88,7 @@ impl ApiClient {
             .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
             .header(USER_AGENT, "rcli")
             .send()
-            .await
-            .unwrap()
+            .await?
             .json::<ArticlesResponse>()
             .await;
 
@@ -118,8 +116,7 @@ impl ApiClient {
             .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
             .header(USER_AGENT, "rcli")
             .send()
-            .await
-            .unwrap()
+            .await?
             .json::<DetailResponse>()
             .await;
 
@@ -144,8 +141,8 @@ impl ApiClient {
         let token_result = client.post("https://www.reddit.com/api/v1/access_token")
             .basic_auth(key, Some(secret))
             .body("grant_type=client_credentials")
-            .send().await
-            .unwrap()
+            .send()
+            .await?
             .json::<OAuthResponse>()
             .await;
 
