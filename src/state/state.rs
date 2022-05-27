@@ -1,11 +1,14 @@
 use tui::widgets::ListState;
 
-use crate::state::SubredditDetail;
+use super::Subreddit;
+use super::Article;
+
 
 pub struct State {
     pub input: String,
     pub subbreddits: StatefulList<String>,
-    pub subbreddit_details: Option<SubredditDetail>,
+    pub selected_subreddit: Option<Subreddit>,
+    pub articles: StatefulList<Article>,
     pub screen: Screen
 }
 
@@ -19,7 +22,8 @@ impl State {
         State { 
             input: String::new(), 
             subbreddits: StatefulList::with_items(vec![]),
-            subbreddit_details: None,
+            selected_subreddit: None,
+            articles: StatefulList::with_items(vec![]),
             screen: Screen::Search
         }
     }

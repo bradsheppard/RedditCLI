@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
 use std::env;
 
-use crate::state::SubredditDetail;
+use crate::state::{Subreddit, Article};
 
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -13,6 +13,26 @@ struct OAuthResponse {
 #[derive(Serialize, Deserialize, Debug)]
 struct NamesResponse {
     names: Vec<String>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ArticlesResponse {
+    data: ArticleData
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ArticleData {
+    children: Vec<ArticleLink>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ArticleLink {
+    data: ArticleLinkData
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ArticleLinkData {
+    title: String
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,7 +82,36 @@ impl ApiClient {
         }
     }
 
-    pub async fn get_subreddit_details(&self, subbreddit: &str) -> Result<SubredditDetail, reqwest::Error> {
+    pub async fn get_subreddit_articles(&self, subbreddit: &str) -> Result<Vec<Article>, reqwest::Error> {
+        let client = reqwest::Client::new();
+
+        let resp = client.get(format!("https://oauth.reddit.com/r/{subbreddit}/new"))
+            .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
+            .header(USER_AGENT, "rcli")
+            .send()
+            .await
+            .unwrap()
+            .json::<ArticlesResponse>()
+            .await;
+
+        match resp {
+            Ok(r) => {
+                let mut result = Vec::new();
+
+                for child in r.data.children {
+                    let article = Article {
+                        title: child.data.title
+                    };
+                    result.push(article);
+                }
+
+                return Ok(result);
+            }
+            Err(r) => Err(r)
+        }
+    }
+
+    pub async fn get_subreddit_details(&self, subbreddit: &str) -> Result<Subreddit, reqwest::Error> {
         let client = reqwest::Client::new();
 
         let resp = client.get(format!("https://oauth.reddit.com/r/{subbreddit}/about"))
@@ -77,7 +126,7 @@ impl ApiClient {
         match resp {
             Ok(r) => {
                 let data = r.data;
-                let subreddit_detail = SubredditDetail {
+                let subreddit_detail = Subreddit {
                     name: subbreddit.to_owned(),
                     description: data.description,
                     subscriber_count: data.subscribers

@@ -24,9 +24,9 @@ async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, clie
                 terminal.draw(|f| ui::draw_search_screen(f, &state.input, &mut state.subbreddits))?;
             }
             Screen::Details => {
-                match &state.subbreddit_details {
+                match &state.selected_subreddit {
                     Some(details) => {
-                        terminal.draw(|f| ui::draw_detail_screen(f, details))?;
+                        terminal.draw(|f| ui::draw_detail_screen(f, details, &mut state.articles))?;
                     }
                     None => {
                         panic!("Exiting");
