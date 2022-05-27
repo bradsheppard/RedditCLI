@@ -53,9 +53,6 @@ pub fn draw_detail_screen<B: Backend>(f: &mut Frame<B>, details: &Subreddit, art
                 .add_modifier(Modifier::BOLD)
         )
         .highlight_symbol(">> ");
-    let articles_block = Block::default()
-        .title("Articles")
-        .borders(Borders::all());
 
     f.render_widget(help_paragraph, chunks[0]);
     f.render_widget(meta_paragraph, chunks[1]);
