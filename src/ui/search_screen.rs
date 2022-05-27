@@ -25,7 +25,7 @@ pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subr
    let help_line = Spans::from("ESC: To Exit");
    let help_paragraph = Paragraph::new(help_line);
 
-    let items: Vec<ListItem> = subreddits
+    let subreddit_items: Vec<ListItem> = subreddits
         .items
         .iter()
         .map(|i| {
@@ -34,7 +34,7 @@ pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subr
         })
         .collect();
 
-    let items = List::new(items)
+    let subreddit_list = List::new(subreddit_items)
         .block(Block::default().borders(Borders::ALL).title("Subreddits"))
         .highlight_style(
             Style::default()
@@ -52,6 +52,6 @@ pub fn draw_search_screen<B: Backend>(f: &mut Frame<B>, input_string: &str, subr
 
     f.render_widget(help_paragraph, chunks[0]);
     f.render_widget(input, chunks[1]);
-    f.render_stateful_widget(items, chunks[2], &mut subreddits.state);
+    f.render_stateful_widget(subreddit_list, chunks[2], &mut subreddits.state);
 }
 
