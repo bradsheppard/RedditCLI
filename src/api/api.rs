@@ -1,50 +1,14 @@
-use serde::{Serialize, Deserialize};
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
 use std::env;
 
 use crate::state::{Subreddit, Article};
 
+use super::article::ArticlesResponse;
+use super::comment::ListingResponse;
+use super::oauth::OAuthResponse;
+use super::subreddit::SubredditResponse;
+use super::names::NamesResponse;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct OAuthResponse {
-    access_token: String
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct NamesResponse {
-    names: Vec<String>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct ArticlesResponse {
-    data: ArticleData
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct ArticleData {
-    children: Vec<ArticleLink>
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct ArticleLink {
-    data: ArticleLinkData
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct ArticleLinkData {
-    title: String
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct DetailResponse {
-    data: DetailData
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-struct DetailData {
-    description: String,
-    subscribers: usize
-}
 
 pub struct ApiClient {
     token: String,
@@ -98,6 +62,7 @@ impl ApiClient {
 
                 for child in r.data.children {
                     let article = Article {
+                        id: child.data.name,
                         title: child.data.title
                     };
                     result.push(article);
@@ -109,6 +74,38 @@ impl ApiClient {
         }
     }
 
+    pub async fn get_article_comments(&self, subreddit_name: &str, article_id: &str) -> Result<Vec<String>, reqwest::Error> {
+        let client = reqwest::Client::new();
+
+        let resp = client.get(format!("https://oauth.reddit.com/r/{subreddit_name}/comments/{article_id}"))
+            .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
+            .header(USER_AGENT, "rcli")
+            .send()
+            .await?
+            .json::<Vec<ListingResponse>>()
+            .await;
+
+        let mut result = Vec::new();
+
+        match resp {
+            Ok(r) => {
+                for listing in r {
+                    for comment in listing.data.children {
+                        match comment.data.body {
+                            Some(body) => {
+                                result.push(body);
+                            }
+                            None => {}
+                        }
+                    }
+                }
+
+                return Ok(result);
+            }
+            Err(r) => Err(r)
+        }
+    }   
+
     pub async fn get_subreddit_details(&self, subbreddit: &str) -> Result<Subreddit, reqwest::Error> {
         let client = reqwest::Client::new();
 
@@ -117,7 +114,7 @@ impl ApiClient {
             .header(USER_AGENT, "rcli")
             .send()
             .await?
-            .json::<DetailResponse>()
+            .json::<SubredditResponse>()
             .await;
 
         match resp {
