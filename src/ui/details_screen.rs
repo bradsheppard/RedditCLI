@@ -27,6 +27,8 @@ pub fn draw_detail_screen<B: Backend>(f: &mut Frame<B>, details: &Subreddit, art
     let meta_lines = vec![
         Spans::from(&*details.name),
         Spans::from("\n"),
+        Spans::from("Subscriber Count: ".to_owned() + &details.subscriber_count.to_string()),
+        Spans::from("\n"),
         Spans::from(&*details.description)
     ];
     let meta_block = Block::default()

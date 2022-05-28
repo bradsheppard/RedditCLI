@@ -7,6 +7,12 @@ pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: 
         KeyCode::Char('q') => {
             state.screen = Screen::Search;
         }
+        KeyCode::Down => {
+            state.articles.next();
+        }
+        KeyCode::Up => {
+            state.articles.previous();
+        }
         _ => {}
     }
 }
