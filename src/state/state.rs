@@ -1,5 +1,6 @@
 use tui::widgets::ListState;
 
+use super::Comment;
 use super::Subreddit;
 use super::Article;
 
@@ -9,7 +10,8 @@ pub struct State {
     pub subbreddits: StatefulList<String>,
     pub selected_subreddit: Option<Subreddit>,
     pub articles: StatefulList<Article>,
-    pub screen: Screen
+    pub screen: Screen,
+    pub comments: StatefulList<Comment>
 }
 
 pub enum Screen {
@@ -24,7 +26,8 @@ impl State {
             subbreddits: StatefulList::with_items(vec![]),
             selected_subreddit: None,
             articles: StatefulList::with_items(vec![]),
-            screen: Screen::Search
+            screen: Screen::Search,
+            comments: StatefulList::with_items(vec![])
         }
     }
 }

@@ -1,11 +1,36 @@
 use crossterm::event::KeyCode;
 
-use crate::{state::{State, Screen}, api::ApiClient};
+use crate::{state::{State, Screen, StatefulList, Comment}, api::ApiClient};
 
 pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: &ApiClient) {
     match key_code {
         KeyCode::Char('q') => {
             state.screen = Screen::Search;
+        }
+        KeyCode::Enter => {
+            let selected_article_index = state.articles.state.selected();
+            let selected_subreddit = &state.selected_subreddit;
+
+            match (selected_article_index, selected_subreddit) {
+                (Some(index), Some(subreddit)) => {
+                    let selected_article = &state.articles.items[index];
+                    let articled_comments = client.get_article_comments(&subreddit.name, &selected_article.id).await;
+
+                    match articled_comments {
+                        Ok(comments) => {
+                            let comment_vector = comments.iter().map(|x| 
+                                Comment {
+                                    body: x.to_owned()
+                                }
+                            ).collect();
+
+                            state.comments = StatefulList::with_items(comment_vector);
+                        }
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
         }
         KeyCode::Down => {
             state.articles.next();
