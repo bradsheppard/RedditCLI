@@ -18,5 +18,5 @@ pub struct ArticleLink {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ArticleLinkData {
     pub title: String,
-    pub name: String
+    pub id: String
 }

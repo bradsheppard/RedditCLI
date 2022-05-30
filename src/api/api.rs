@@ -61,7 +61,7 @@ impl ApiClient {
                 let result = r.data.children.iter()
                     .map(|x| 
                          Article {
-                             id: x.data.name.to_owned(), 
+                             id: x.data.id.to_owned(), 
                              title: x.data.title.to_owned()
                          })
                     .collect();
@@ -160,5 +160,11 @@ mod tests {
         assert_eq!(subreddits.len() >= 1, true);
     }
 
+    #[tokio::test]
+    async fn test_get_comments() {
+        let client = ApiClient::new().await.ok().unwrap();
+        let comments = client.get_article_comments("vim", "6rf9z6").await.unwrap();
+        assert_eq!(comments.len() >= 1, true);
+    }
 }
 

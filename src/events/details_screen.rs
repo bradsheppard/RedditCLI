@@ -14,9 +14,9 @@ pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: 
             match (selected_article_index, selected_subreddit) {
                 (Some(index), Some(subreddit)) => {
                     let selected_article = &state.articles.items[index];
-                    let articled_comments = client.get_article_comments(&subreddit.name, &selected_article.id).await;
+                    let article_comments = client.get_article_comments(&subreddit.name, &selected_article.id).await;
 
-                    match articled_comments {
+                    match article_comments {
                         Ok(comments) => {
                             let comment_vector = comments.iter().map(|x| 
                                 Comment {
@@ -25,6 +25,7 @@ pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: 
                             ).collect();
 
                             state.comments = StatefulList::with_items(comment_vector);
+                            state.screen = Screen::Article;
                         }
                         _ => {}
                     }

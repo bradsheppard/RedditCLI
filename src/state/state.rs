@@ -16,7 +16,8 @@ pub struct State {
 
 pub enum Screen {
     Search,
-    Details
+    Details,
+    Article
 }
 
 impl State {
