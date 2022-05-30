@@ -58,15 +58,13 @@ impl ApiClient {
 
         match resp {
             Ok(r) => {
-                let mut result = Vec::new();
-
-                for child in r.data.children {
-                    let article = Article {
-                        id: child.data.name,
-                        title: child.data.title
-                    };
-                    result.push(article);
-                }
+                let result = r.data.children.iter()
+                    .map(|x| 
+                         Article {
+                             id: x.data.name.to_owned(), 
+                             title: x.data.title.to_owned()
+                         })
+                    .collect();
 
                 return Ok(result);
             }
