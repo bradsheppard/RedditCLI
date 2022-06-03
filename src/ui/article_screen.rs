@@ -34,24 +34,25 @@ pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comm
         .alignment(Alignment::Left)
         .wrap(Wrap { trim: true });
 
-    let comment_items: Vec<ListItem> = comments
-        .items
-        .iter()
-        .map(|i| {
-            let span = Span::styled(&i.body, Style::default().add_modifier(Modifier::ITALIC));
-            ListItem::new(span)
-        })
-        .collect();
-    let comment_list = List::new(comment_items)
-        .block(Block::default().borders(Borders::ALL).title("Comments"))
-        .highlight_style(
-            Style::default()
-                .bg(Color::LightGreen)
-                .add_modifier(Modifier::BOLD)
-        )
-        .highlight_symbol(">> ");
+    let mut comment_items = Vec::new();
+
+    for comment in &comments.items {
+        let text = Spans::from(&*comment.body);
+        let space = Spans::from("");
+
+        comment_items.push(text);
+        comment_items.push(space);
+    }
+
+    let comment_block = Block::default()
+        .title("Comments")
+        .borders(Borders::ALL);
+    let comment_paragraph = Paragraph::new(comment_items)
+        .block(comment_block)
+        .alignment(Alignment::Left)
+        .wrap(Wrap { trim: true });
 
     f.render_widget(help_paragraph, chunks[0]);
     f.render_widget(meta_paragraph, chunks[1]);
-    f.render_stateful_widget(comment_list, chunks[2], &mut comments.state);
+    f.render_widget(comment_paragraph, chunks[2]);
 }
