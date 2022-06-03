@@ -1,8 +1,8 @@
 use tui::Frame;
 use tui::layout::{Direction, Constraint, Alignment, Layout};
-use tui::style::{Style, Modifier, Color};
-use tui::text::{Spans, Span};
-use tui::widgets::{Paragraph, Block, Borders, Wrap, ListItem, List};
+
+use tui::text::Spans;
+use tui::widgets::{Paragraph, Block, Borders, Wrap};
 use tui::backend::Backend;
 
 use crate::state::{Article, Comment, StatefulList};
