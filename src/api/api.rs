@@ -157,14 +157,14 @@ mod tests {
     async fn test_get_subbreddits() {
         let client = ApiClient::new().await.ok().unwrap();
         let subreddits = client.get_subreddits("guitar").await.unwrap();
-        assert_eq!(subreddits.len() >= 1, true);
+        assert!(subreddits.len() >= 1);
     }
 
     #[tokio::test]
     async fn test_get_comments() {
         let client = ApiClient::new().await.ok().unwrap();
         let comments = client.get_article_comments("vim", "6rf9z6").await.unwrap();
-        assert_eq!(comments.len() >= 1, true);
+        assert!(comments.len() >= 1);
     }
 }
 

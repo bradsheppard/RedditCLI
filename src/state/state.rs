@@ -57,7 +57,13 @@ impl<T> StatefulList<T> {
             }
             None => 0,
         };
-        self.state.select(Some(i));
+
+        match self.items.len() {
+            0 => {}
+            _ => {
+                self.state.select(Some(i));
+            }
+        }
     }
 
     pub fn previous(&mut self) {
@@ -71,10 +77,79 @@ impl<T> StatefulList<T> {
             }
             None => 0,
         };
-        self.state.select(Some(i));
+
+        match self.items.len() {
+            0 => {}
+            _ => {
+                self.state.select(Some(i));
+            }
+        }
     }
 
     pub fn unselect(&mut self) {
         self.state.select(None);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::StatefulList;
+
+    #[test]
+    fn test_select_next() {
+        let items = vec!["item 1", "item 2", "item 3"];
+        let mut stateful_list = StatefulList::with_items(items);
+
+        stateful_list.next();
+        stateful_list.next();
+
+        let index = stateful_list.state.selected().unwrap();
+        assert_eq!(index, 1);
+    }
+
+    #[test]
+    fn test_select_previous() {
+        let items = vec!["item 1", "item 2", "item 3"];
+        let mut stateful_list = StatefulList::with_items(items);
+        
+        stateful_list.next();
+        stateful_list.next();
+        stateful_list.previous();
+
+        let index = stateful_list.state.selected().unwrap();
+        assert_eq!(index, 0);
+    }
+
+    #[test]
+    fn test_unselect() {
+        let items = vec!["item 1", "item 2", "item 3"];
+        let mut stateful_list = StatefulList::with_items(items);
+
+        stateful_list.next();
+        stateful_list.unselect();
+
+        let index = stateful_list.state.selected();
+
+        assert!(index.is_none());
+    }
+
+    #[test]
+    fn test_next_empty_list() {
+        let items: Vec<&str> = Vec::new();
+        let mut stateful_list = StatefulList::with_items(items);
+
+        stateful_list.next();
+        stateful_list.next();
+        stateful_list.next();
+    }
+
+    #[test]
+    fn test_previous_empty_list() {
+        let items: Vec<&str> = Vec::new();
+        let mut stateful_list = StatefulList::with_items(items);
+
+        stateful_list.previous();
+        stateful_list.previous();
+        stateful_list.previous();
     }
 }
