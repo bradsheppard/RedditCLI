@@ -166,5 +166,20 @@ mod tests {
         let comments = client.get_article_comments("vim", "6rf9z6").await.unwrap();
         assert!(comments.len() >= 1);
     }
+
+    #[tokio::test]
+    async fn test_get_subbreddit_articles() {
+        let client = ApiClient::new().await.ok().unwrap();
+        let articles = client.get_subreddit_articles("vim").await.unwrap();
+        assert!(articles.len() >= 1);
+    }
+
+    #[tokio::test]
+    async fn test_get_subbreddit_details() {
+        let client = ApiClient::new().await.ok().unwrap();
+        let details = client.get_subreddit_details("vim").await.unwrap();
+        assert!(details.name == "vim");
+        assert!(details.description.len() >= 1);
+    }
 }
 
