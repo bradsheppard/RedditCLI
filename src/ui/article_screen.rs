@@ -5,7 +5,7 @@ use tui::text::Spans;
 use tui::widgets::{Paragraph, Block, Borders, Wrap};
 use tui::backend::Backend;
 
-use crate::state::{Article, Comment, StatefulList};
+use crate::state::{Article, StatefulList, Comment};
 
 pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comments: &mut StatefulList<Comment>) {
     let chunks = Layout::default()

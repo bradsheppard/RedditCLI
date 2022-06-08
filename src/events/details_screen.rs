@@ -1,6 +1,6 @@
 use crossterm::event::KeyCode;
 
-use crate::{state::{State, Screen, StatefulList, Comment}, api::ApiClient};
+use crate::{state::{State, Screen, StatefulList}, api::ApiClient};
 
 pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: &ApiClient) {
     match key_code {
@@ -18,13 +18,7 @@ pub async fn handle_detail_screen(key_code: KeyCode, state: &mut State, client: 
 
                     match article_comments {
                         Ok(comments) => {
-                            let comment_vector = comments.iter().map(|x| 
-                                Comment {
-                                    body: x.to_owned()
-                                }
-                            ).collect();
-
-                            state.comments = StatefulList::with_items(comment_vector);
+                            state.comments = StatefulList::with_items(comments);
                             state.screen = Screen::Article;
                         }
                         _ => {}

@@ -1,10 +1,10 @@
 use reqwest::header::{AUTHORIZATION, USER_AGENT};
 use std::env;
 
-use crate::state::{Subreddit, Article};
+use crate::state::{Subreddit, Article, Comment};
 
 use super::article::ArticlesResponse;
-use super::comment::ListingResponse;
+use super::comment::{ListingResponse, Replies};
 use super::oauth::OAuthResponse;
 use super::subreddit::SubredditResponse;
 use super::names::NamesResponse;
@@ -72,7 +72,7 @@ impl ApiClient {
         }
     }
 
-    pub async fn get_article_comments(&self, subreddit_name: &str, article_id: &str) -> Result<Vec<String>, reqwest::Error> {
+    pub async fn get_article_comments(&self, subreddit_name: &str, article_id: &str) -> Result<Vec<Comment>, reqwest::Error> {
         let client = reqwest::Client::new();
 
         let resp = client.get(format!("https://oauth.reddit.com/r/{subreddit_name}/comments/{article_id}"))
@@ -88,14 +88,7 @@ impl ApiClient {
         match resp {
             Ok(r) => {
                 for listing in r {
-                    for comment in listing.data.children {
-                        match comment.data.body {
-                            Some(body) => {
-                                result.push(body);
-                            }
-                            None => {}
-                        }
-                    }
+                    ApiClient::recurse_comments(listing, &mut result)
                 }
 
                 return Ok(result);
@@ -103,6 +96,30 @@ impl ApiClient {
             Err(r) => Err(r)
         }
     }   
+
+    fn recurse_comments(listing: ListingResponse, result: &mut Vec<Comment>) {
+        for child in listing.data.children {
+            let mut comment = Comment {body: "".to_owned(), replies: Vec::new()};
+            match child.data.body {
+                Some(body) => {
+                    comment.body = body;
+                }
+                None => {}
+            }
+            match child.data.replies {
+                None => {}
+                Some(replies) => {
+                    match replies {
+                        Replies::String(_) => {}
+                        Replies::ListingResponse(r) => {
+                            ApiClient::recurse_comments(r, &mut comment.replies);
+                        }
+                    }
+                }
+            }
+            result.push(comment);
+        }
+    }
 
     pub async fn get_subreddit_details(&self, subbreddit: &str) -> Result<Subreddit, reqwest::Error> {
         let client = reqwest::Client::new();
