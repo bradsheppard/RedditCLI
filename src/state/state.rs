@@ -47,43 +47,41 @@ impl<T> StatefulList<T> {
     }
 
     pub fn next(&mut self) {
-        let i = match self.state.selected() {
+        if self.items.len() == 0 {
+            return;
+        }
+
+        match self.state.selected() {
             Some(i) => {
                 if i >= self.items.len() - 1 {
-                    0
+                    self.unselect();
                 } else {
-                    i + 1
+                    self.state.select(Some(i + 1));
                 }
             }
-            None => 0,
-        };
-
-        match self.items.len() {
-            0 => {}
-            _ => {
-                self.state.select(Some(i));
+            None => {
+                self.state.select(Some(0));
             }
-        }
+        };
     }
 
     pub fn previous(&mut self) {
-        let i = match self.state.selected() {
+        if self.items.len() == 0 {
+            return;
+        }
+
+        match self.state.selected() {
             Some(i) => {
                 if i == 0 {
-                    self.items.len() - 1
+                    self.unselect();
                 } else {
-                    i - 1
+                    self.state.select(Some(i - 1));
                 }
             }
-            None => 0,
-        };
-
-        match self.items.len() {
-            0 => {}
-            _ => {
-                self.state.select(Some(i));
+            None => {
+                self.state.select(Some(self.items.len() - 1));
             }
-        }
+        };
     }
 
     pub fn unselect(&mut self) {
