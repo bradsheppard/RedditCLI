@@ -11,7 +11,8 @@ pub struct State {
     pub selected_subreddit: Option<Subreddit>,
     pub articles: StatefulList<Article>,
     pub screen: Screen,
-    pub comments: StatefulList<Comment>
+    pub comments: StatefulList<Comment>,
+    pub scroll: u16
 }
 
 pub enum Screen {
@@ -28,7 +29,8 @@ impl State {
             selected_subreddit: None,
             articles: StatefulList::with_items(vec![]),
             screen: Screen::Search,
-            comments: StatefulList::with_items(vec![])
+            comments: StatefulList::with_items(vec![]),
+            scroll: 0
         }
     }
 }

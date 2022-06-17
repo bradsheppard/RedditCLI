@@ -36,7 +36,7 @@ async fn run_app<B: Backend>(terminal: &mut Terminal<B>, state: &mut State, clie
             Screen::Article => {
                 match state.articles.state.selected() {
                     Some(index) => {
-                        terminal.draw(|f| ui::draw_article_screen(f, &state.articles.items[index], &mut state.comments))?;
+                        terminal.draw(|f| ui::draw_article_screen(f, &state.articles.items[index], &mut state.comments, &mut state.scroll))?;
                     }
                     None => {
                         panic!("Exiting");

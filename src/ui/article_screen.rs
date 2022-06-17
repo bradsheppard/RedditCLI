@@ -7,7 +7,8 @@ use tui::backend::Backend;
 
 use crate::state::{Article, StatefulList, Comment};
 
-pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comments: &mut StatefulList<Comment>) {
+pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comments: &mut StatefulList<Comment>,
+                                       scroll: &mut u16) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -50,7 +51,8 @@ pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comm
     let comment_paragraph = Paragraph::new(comment_items)
         .block(comment_block)
         .alignment(Alignment::Left)
-        .wrap(Wrap { trim: true });
+        .wrap(Wrap { trim: true })
+        .scroll((*scroll, 0));
 
     f.render_widget(help_paragraph, chunks[0]);
     f.render_widget(meta_paragraph, chunks[1]);
