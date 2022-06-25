@@ -58,3 +58,15 @@ pub fn draw_article_screen<B: Backend>(f: &mut Frame<B>, article: &Article, comm
     f.render_widget(meta_paragraph, chunks[1]);
     f.render_widget(comment_paragraph, chunks[2]);
 }
+
+fn recurse_comments<'a>(spans: &mut Vec<Spans<'a>>, comments: &'a Vec<Comment>) {
+    for comment in comments {
+        let text = Spans::from(&*comment.body);
+        let space = Spans::from("");
+
+        spans.push(text);
+        spans.push(space);
+
+        recurse_comments(spans, &comment.replies);
+    }
+}
