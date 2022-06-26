@@ -51,6 +51,7 @@ impl ApiClient {
         let resp = client.get(format!("https://oauth.reddit.com/r/{subbreddit}/new"))
             .header(AUTHORIZATION, "Bearer ".to_owned() + &self.token)
             .header(USER_AGENT, "rcli")
+            .query(&[("limit", "100")])
             .send()
             .await?
             .json::<ArticlesResponse>()
